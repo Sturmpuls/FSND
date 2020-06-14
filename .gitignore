@@ -1,7 +1,14 @@
-.vscode
+# Binaries #
+############
 __pycache__
 venv
 env
+node_modules
+
+# Development Environment #
+###########################
+/.vscode
+*.code-workspace
 
 # OS generated files #
 ######################
