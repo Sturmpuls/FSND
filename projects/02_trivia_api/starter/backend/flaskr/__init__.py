@@ -36,8 +36,7 @@ def create_app(test_config=None):
 
     @app.route('/categories', methods=['GET'])
     def get_categories():
-        '''
-        Handles GET requests for getting all categories.
+        '''Handles GET requests for querying available categories.
         '''
 
         # get all categories and convert them to a dict like so {id: category}
@@ -56,8 +55,18 @@ def create_app(test_config=None):
 
     @app.route('/questions', methods=['GET'])
     def get_questions():
-        '''
-        Handles GET requests for getting all questions.
+        '''Handles GET requests for getting all questions.
+
+        Parameters
+        ----------
+        pages : `int`
+            Page number to display. A page usually contains 10 questions.
+
+        Returns
+        -------
+        json
+            a dict containing question objects for the queried page
+            as well as some attributes
         '''
 
         # get all questions and paginate
