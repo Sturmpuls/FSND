@@ -25,14 +25,20 @@ def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
 
-    '''
-    @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
-    '''
-    CORS(app, resources={'/': {'origins': '*'}})
+    CORS(app)
 
-    '''
-    @TODO: Use the after_request decorator to set Access-Control-Allow
-    '''
+    @app.after_request
+    def after_request(response):
+        '''Specifies allowed origins, headers and HTTP methods.
+        '''
+
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers',
+                             'Content-Type, Authorization')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET, PUT, POST, PATCH, DELETE, OPTIONS')
+
+        return response
 
     @app.route('/categories', methods=['GET'])
     def get_categories():
@@ -129,7 +135,6 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     '''
-
 
     '''
     @TODO:
