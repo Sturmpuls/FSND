@@ -61,7 +61,7 @@ def create_app(test_config=None):
 
     @app.route('/questions', methods=['GET'])
     def get_questions():
-        '''Handles GET requests for getting all questions.
+        '''Handles GET requests for questions. Results are paginated.
 
         Parameters
         ----------
@@ -72,7 +72,7 @@ def create_app(test_config=None):
         -------
         json
             a dict containing question objects for the queried page
-            as well as some attributes
+            as well as some other attributes
         '''
 
         # get all questions and paginate
@@ -104,9 +104,19 @@ def create_app(test_config=None):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     '''
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
+    def delete_question(question_id):
+        question = Question.query.get(question_id)
+
+        if question is None:
+            abort(404)
+
+        question.delete()
+
+        pass
 
     '''
-    @TODO:
+    @DONE:
     Create an endpoint to POST a new question,
     which will require the question and answer text,
     category, and difficulty score.
@@ -115,6 +125,35 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     '''
+    @app.route('/questions', methods=['POST'])
+    def add_question(question, answer, category, difficulty):
+        body = request.get_data()
+
+        if ('question' in body and 'answer' in body and
+            'category' in body and 'difficulty' in body):
+
+            new_question = body.get('question')
+            new_answer = body.get('answer')
+            new_category = body.get('category')
+            new_difficulty = body.get('difficulty')
+
+            try:
+                question = Question(question=new_question, answer=new_answer,
+                                    category=new_category, difficulty=new_difficulty)
+                question.insert()
+
+                return jsonify({
+                    'success': True,
+                    'created': question.id
+                })
+
+            except:
+                abort(422)
+
+        else:
+            abort(422)
+
+
 
     '''
     @TODO:
