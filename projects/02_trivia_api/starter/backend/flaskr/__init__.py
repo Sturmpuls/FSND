@@ -40,7 +40,6 @@ def create_app(test_config=None):
 
         return response
 
-
     @app.route('/categories', methods=['GET'])
     def get_categories():
         '''Handles GET requests for querying available categories.
@@ -57,19 +56,35 @@ def create_app(test_config=None):
         # return the results
         return jsonify({
             'success': True,
-            'categories': categories
+            'categories': categories,
             'categories_total': len(categories)
         })
 
 
     '''
-    @TODO:
+    @DONE:
     Create a GET endpoint to get questions based on category.
 
     TEST: In the "List" tab / main screen, clicking on one of the
     categories in the left column will cause only questions of that
     category to be shown.
     '''
+    @app.route('/questions/<int:category_id>/questions', methods=['GET'])
+    def get_questions_by_category(category_id):
+        selection = Question.query.filter(
+            Question.category == category_id
+            ).all()
+        current_questions = paginate_questions(request, selection)
+
+        if len(current_questions) == 0:
+            return abort(404)
+
+        return jsonify({
+            'success': True,
+            'questions': current_questions,
+            'total_questions': len(selection),
+            'current_category': category_id
+        })
 
     @app.route('/questions', methods=['GET'])
     def get_questions():
@@ -179,7 +194,6 @@ def create_app(test_config=None):
         else:
             abort(422)
 
-
     '''
     @DONE:
     Create a POST endpoint to get questions based on a search term.
@@ -206,7 +220,6 @@ def create_app(test_config=None):
             'questions': current_questions,
             'total_questions': total_questions
         })
-
 
     '''
     @DONE:
@@ -239,7 +252,6 @@ def create_app(test_config=None):
             'success': True,
             'question': question.format()
         })
-
 
     @app.errorhandler(400)
     def bad_request(error):
