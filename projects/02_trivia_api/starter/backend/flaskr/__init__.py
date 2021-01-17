@@ -59,6 +59,7 @@ def create_app(test_config=None):
             'categories': categories
         })
 
+
     @app.route('/questions', methods=['GET'])
     def get_questions():
         '''Handles GET requests for questions. Results are paginated.
@@ -80,8 +81,9 @@ def create_app(test_config=None):
         total_questions = len(selection)
         current_questions = paginate_questions(request, selection)
 
-        # get all categories and add to dict like {id: category}
-        categories = {category.id: category.type for category in selection}
+        # get all categories
+        categories = {category.id: category.type
+                      for category in Category.query.all()}
 
         # return 404 if the requested page exceeded the available questions
         if len(current_questions) == 0:
@@ -184,7 +186,7 @@ def create_app(test_config=None):
         total_questions = len(questions)
 
         if (total_questions == 0):
-            abort(404)
+            return abort(404)
 
         current_questions = paginate_questions(request, questions)
 
@@ -204,8 +206,9 @@ def create_app(test_config=None):
     category to be shown.
     '''
 
+
     '''
-    @TODO:
+    @DONE:
     Create a POST endpoint to get questions to play the quiz.
     This endpoint should take category and previous question parameters
     and return a random questions within the given category,
@@ -215,6 +218,27 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     '''
+    @app.route('/quizzes', methods=['POST'])
+    def get_random_question():
+        body = request.get_data()
+
+        if body is None or 'quiz_category' not in body.keys():
+            return abort(422)
+
+        previous_questions = []
+        if 'previous_questions' in body.keys():
+            previous_questions = body['previous_questions']
+
+        question = Question.query.filter(
+            Question.category == body['quiz_category']['id'],
+            Question.id.notin_(previous_questions)
+            ).first()
+
+        return jsonify({
+            'success': True,
+            'question': question.format()
+        })
+
 
     @app.errorhandler(400)
     def bad_request(error):
