@@ -81,7 +81,6 @@ def create_app(test_config=None):
         current_questions = paginate_questions(request, selection)
 
         # get all categories and add to dict like {id: category}
-        selection = Category.query.all()
         categories = {category.id: category.type for category in selection}
 
         # return 404 if the requested page exceeded the available questions
@@ -98,22 +97,26 @@ def create_app(test_config=None):
         })
 
     '''
-    @TODO:
+    @DONE:
     Create an endpoint to DELETE question using a question ID.
 
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     '''
-    @app.route('/questions/<int:question_id>', methods=['DELETE'])
-    def delete_question(question_id):
-        question = Question.query.get(question_id)
+    @app.route('/questions/<int:id>', methods=['DELETE'])
+    def delete_question(id):
+        question = Question.query.get(id)
 
+        # abort with 404 if no question is found
         if question is None:
             abort(404)
 
         question.delete()
 
-        pass
+        return jsonify({
+            'success': True,
+            'deleted': id
+        })
 
     '''
     @DONE:
