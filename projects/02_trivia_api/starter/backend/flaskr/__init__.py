@@ -47,7 +47,7 @@ def create_app(test_config=None):
 
         # get all categories and convert them to a dict like so {id: category}
         selection = Category.query.all()
-        categories = [category.format() for category in selection]
+        categories = {category.id: category.type for category in selection}
 
         # abort with 404 if no categories were found
         if len(categories) == 0:
@@ -69,7 +69,7 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     '''
-    @app.route('/questions/<int:category_id>/questions', methods=['GET'])
+    @app.route('/categories/<int:category_id>/questions', methods=['GET'])
     def get_questions_by_category(category_id):
         selection = Question.query.filter(
             Question.category == category_id
@@ -163,12 +163,12 @@ def create_app(test_config=None):
     of the questions list in the "List" tab.
     '''
     @app.route('/questions', methods=['POST'])
-    def create_question(question, answer, category, difficulty):
-        body = request.get_data()
+    def add_question():
+        body = request.get_json()
 
         # redirect if request contains a search_term
-        if 'search_term' in body.keys():
-            return search_questions(request, body['search_term'])
+        if 'searchTerm' in body.keys():
+            return search_questions(request, body['searchTerm'])
 
         if ('question' in body and 'answer' in body and
             'category' in body and 'difficulty' in body):
@@ -234,7 +234,7 @@ def create_app(test_config=None):
     '''
     @app.route('/quizzes', methods=['POST'])
     def get_random_question():
-        body = request.get_data()
+        body = request.get_json()
 
         if body is None or 'quiz_category' not in body.keys():
             return abort(422)
@@ -243,10 +243,22 @@ def create_app(test_config=None):
         if 'previous_questions' in body.keys():
             previous_questions = body['previous_questions']
 
-        question = Question.query.filter(
-            Question.category == body['quiz_category']['id'],
-            Question.id.notin_(previous_questions)
-            ).first()
+        category = body['quiz_category']['id']
+        # "ALL" categories
+        if category == 0:
+            query = Question.query.filter(
+                Question.id.notin_(previous_questions)
+                )
+        # Specific category
+        else:
+            query = Question.query.filter(
+                Question.category == category,
+                Question.id.notin_(previous_questions)
+                )
+        # Get random question from database
+        row_count = int(query.count())
+        question = query.offset((int(row_count * random.random()))).first()
+
 
         return jsonify({
             'success': True,
