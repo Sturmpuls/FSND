@@ -40,6 +40,7 @@ def create_app(test_config=None):
 
         return response
 
+
     @app.route('/categories', methods=['GET'])
     def get_categories():
         '''Handles GET requests for querying available categories.
@@ -47,7 +48,7 @@ def create_app(test_config=None):
 
         # get all categories and convert them to a dict like so {id: category}
         selection = Category.query.all()
-        categories = {category.id: category.type for category in selection}
+        categories = [category.format() for category in selection]
 
         # abort with 404 if no categories were found
         if len(categories) == 0:
@@ -57,8 +58,18 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'categories': categories
+            'categories_total': len(categories)
         })
 
+
+    '''
+    @TODO:
+    Create a GET endpoint to get questions based on category.
+
+    TEST: In the "List" tab / main screen, clicking on one of the
+    categories in the left column will cause only questions of that
+    category to be shown.
+    '''
 
     @app.route('/questions', methods=['GET'])
     def get_questions():
@@ -195,16 +206,6 @@ def create_app(test_config=None):
             'questions': current_questions,
             'total_questions': total_questions
         })
-
-
-    '''
-    @TODO:
-    Create a GET endpoint to get questions based on category.
-
-    TEST: In the "List" tab / main screen, clicking on one of the
-    categories in the left column will cause only questions of that
-    category to be shown.
-    '''
 
 
     '''
