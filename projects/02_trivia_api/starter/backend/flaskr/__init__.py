@@ -105,18 +105,24 @@ def create_app(test_config=None):
     '''
     @app.route('/questions/<int:id>', methods=['DELETE'])
     def delete_question(id):
-        question = Question.query.get(id)
 
-        # abort with 404 if no question is found
-        if question is None:
-            abort(404)
+        try:
+            question = Question.query.get(id)
 
-        question.delete()
+            # abort with 404 "Not Found" if no question is found
+            if question is None:
+                abort(404)
 
-        return jsonify({
-            'success': True,
-            'deleted': id
-        })
+            question.delete()
+
+            return jsonify({
+                'success': True,
+                'deleted': id
+            })
+
+        except:
+            # abort with 422 "Unprocessable Entity" if anything else goes wrong
+            abort(422)
 
     '''
     @DONE:
@@ -129,8 +135,12 @@ def create_app(test_config=None):
     of the questions list in the "List" tab.
     '''
     @app.route('/questions', methods=['POST'])
-    def add_question(question, answer, category, difficulty):
+    def create_question(question, answer, category, difficulty):
         body = request.get_data()
+
+        # redirect if request contains a search_term
+        if 'search_term' in body.keys():
+            return search_questions(request, body['search_term'])
 
         if ('question' in body and 'answer' in body and
             'category' in body and 'difficulty' in body):
@@ -157,9 +167,8 @@ def create_app(test_config=None):
             abort(422)
 
 
-
     '''
-    @TODO:
+    @DONE:
     Create a POST endpoint to get questions based on a search term.
     It should return any questions for whom the search term
     is a substring of the question.
@@ -168,6 +177,23 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     '''
+    def search_questions(request, search_term):
+        # query the database and find any substring equaling the search term
+        regex = Question.question.ilike(f'%{search_term}%')
+        questions = Question.query.filter(regex).all()
+        total_questions = len(questions)
+
+        if (total_questions == 0):
+            abort(404)
+
+        current_questions = paginate_questions(request, questions)
+
+        return jsonify({
+            'success': True,
+            'questions': current_questions,
+            'total_questions': total_questions
+        })
+
 
     '''
     @TODO:
