@@ -1,6 +1,13 @@
-.vscode
-__pycache__
-venv
+/.vscode
+/__pycache__
+/venv
+/env
+
+# Development files #
+######################
+.env
+*.code-workspace
+
 
 # OS generated files #
 ######################
