@@ -6,6 +6,8 @@ import random
 
 from models import setup_db, Question, Category
 
+# This variable is also set in the front-end in QuestionView.js
+# Function: createPagination()
 QUESTIONS_PER_PAGE = 10
 
 
@@ -29,9 +31,10 @@ def create_app(test_config=None):
 
     @app.after_request
     def after_request(response):
-        '''Specifies allowed origins, headers and HTTP methods.
-        '''
+        '''Specify allowed origins, headers and HTTP methods.
 
+        Return a response object.
+        '''
         response.headers.add('Access-Control-Allow-Origin', '*')
         response.headers.add('Access-Control-Allow-Headers',
                              'Content-Type, Authorization')
@@ -42,35 +45,22 @@ def create_app(test_config=None):
 
     @app.route('/categories', methods=['GET'])
     def get_categories():
-        '''Handles GET requests for querying available categories.
-        '''
-
-        # get all categories and convert them to a dict like so {id: category}
+        '''Return available categories.'''
         selection = Category.query.all()
         categories = {category.id: category.type for category in selection}
 
-        # abort with 404 if no categories were found
         if len(categories) == 0:
             abort(404)
 
-        # return the results
         return jsonify({
             'success': True,
             'categories': categories,
             'categories_total': len(categories)
         })
 
-
-    '''
-    @DONE:
-    Create a GET endpoint to get questions based on category.
-
-    TEST: In the "List" tab / main screen, clicking on one of the
-    categories in the left column will cause only questions of that
-    category to be shown.
-    '''
     @app.route('/categories/<int:category_id>/questions', methods=['GET'])
     def get_questions_by_category(category_id):
+        '''Get all questions in a category and return paginated questions.'''
         selection = Question.query.filter(
             Question.category == category_id
             ).all()
@@ -88,19 +78,7 @@ def create_app(test_config=None):
 
     @app.route('/questions', methods=['GET'])
     def get_questions():
-        '''Handles GET requests for questions. Results are paginated.
-
-        Parameters
-        ----------
-        pages : `int`
-            Page number to display. A page usually contains 10 questions.
-
-        Returns
-        -------
-        json
-            a dict containing question objects for the queried page
-            as well as some other attributes
-        '''
+        '''Get all questions in all categories and return paginated questions.'''
 
         # get all questions and paginate
         selection = Question.query.all()
@@ -124,44 +102,6 @@ def create_app(test_config=None):
             'categories': categories
         })
 
-    '''
-    @DONE:
-    Create an endpoint to DELETE question using a question ID.
-
-    TEST: When you click the trash icon next to a question, the question will be removed.
-    This removal will persist in the database and when you refresh the page.
-    '''
-    @app.route('/questions/<int:id>', methods=['DELETE'])
-    def delete_question(id):
-
-        try:
-            question = Question.query.get(id)
-
-            # abort with 404 "Not Found" if no question is found
-            if question is None:
-                abort(404)
-
-            question.delete()
-
-            return jsonify({
-                'success': True,
-                'deleted': id
-            })
-
-        except:
-            # abort with 422 "Unprocessable Entity" if anything else goes wrong
-            abort(422)
-
-    '''
-    @DONE:
-    Create an endpoint to POST a new question,
-    which will require the question and answer text,
-    category, and difficulty score.
-
-    TEST: When you submit a question on the "Add" tab,
-    the form will clear and the question will appear at the end of the last page
-    of the questions list in the "List" tab.
-    '''
     @app.route('/questions', methods=['POST'])
     def add_question():
         body = request.get_json()
@@ -194,16 +134,27 @@ def create_app(test_config=None):
         else:
             abort(422)
 
-    '''
-    @DONE:
-    Create a POST endpoint to get questions based on a search term.
-    It should return any questions for whom the search term
-    is a substring of the question.
+    @app.route('/questions/<int:id>', methods=['DELETE'])
+    def delete_question(id):
 
-    TEST: Search by any phrase. The questions list will update to include
-    only question that include that string within their question.
-    Try using the word "title" to start.
-    '''
+        try:
+            question = Question.query.get(id)
+
+            # abort with 404 "Not Found" if no question is found
+            if question is None:
+                abort(404)
+
+            question.delete()
+
+            return jsonify({
+                'success': True,
+                'deleted': id
+            })
+
+        except:
+            # abort with 422 "Unprocessable Entity" if anything else goes wrong
+            abort(422)
+
     def search_questions(request, search_term):
         # query the database and find any substring equaling the search term
         regex = Question.question.ilike(f'%{search_term}%')
@@ -221,17 +172,6 @@ def create_app(test_config=None):
             'total_questions': total_questions
         })
 
-    '''
-    @DONE:
-    Create a POST endpoint to get questions to play the quiz.
-    This endpoint should take category and previous question parameters
-    and return a random questions within the given category,
-    if provided, and that is not one of the previous questions.
-
-    TEST: In the "Play" tab, after a user selects "All" or a category,
-    one question at a time is displayed, the user is allowed to answer
-    and shown whether they were correct or not.
-    '''
     @app.route('/quizzes', methods=['POST'])
     def get_random_question():
         body = request.get_json()
@@ -258,7 +198,6 @@ def create_app(test_config=None):
         # Get random question from database
         row_count = int(query.count())
         question = query.offset((int(row_count * random.random()))).first()
-
 
         return jsonify({
             'success': True,
