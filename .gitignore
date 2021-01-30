@@ -1,7 +1,8 @@
-/.vscode
-/__pycache__
-/venv
-/env
+**/.vscode
+**/__pycache__
+**/venv
+**/env
+**/node_modules
 
 # Development files #
 ######################
