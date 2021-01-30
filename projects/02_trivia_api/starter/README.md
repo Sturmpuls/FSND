@@ -69,17 +69,9 @@ psql trivia < trivia.psql
 
 Activate the previously created virtual environment within the `backend` folder.
 
-On Windows run:
+On Windows run `env\Scripts\activate.bat`
 
-```
-env\Scripts\activate.bat
-```
-
-On Linux run:
-
-```
-source env/bin/activate
-```
+On Linux run `source env/bin/activate`
 
 To run the server execute:
 
@@ -94,6 +86,7 @@ flask run
 In the `frontend` folder execute:
 
 ```
+npm install  # (only once)
 npm start
 ```
 
