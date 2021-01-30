@@ -110,17 +110,20 @@ def create_app(test_config=None):
         if 'searchTerm' in body.keys():
             return search_questions(request, body['searchTerm'])
 
-        if ('question' in body and 'answer' in body and
-            'category' in body and 'difficulty' in body):
-
-            new_question = body.get('question')
-            new_answer = body.get('answer')
-            new_category = body.get('category')
-            new_difficulty = body.get('difficulty')
+        # Add a question to the database
+        else:
+            for key in ['question', 'answer', 'difficulty', 'category']:
+                if key not in body.keys() or body[key] == None or body[key] == '':
+                    return abort(422)
 
             try:
-                question = Question(question=new_question, answer=new_answer,
-                                    category=new_category, difficulty=new_difficulty)
+                question = Question(
+                    question=body['question'],
+                    answer=body['answer'],
+                    category=body['category'],
+                    difficulty=body['difficulty']
+                    )
+
                 question.insert()
 
                 return jsonify({
@@ -130,9 +133,6 @@ def create_app(test_config=None):
 
             except:
                 abort(422)
-
-        else:
-            abort(422)
 
     @app.route('/questions/<int:id>', methods=['DELETE'])
     def delete_question(id):
