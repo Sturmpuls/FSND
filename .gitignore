@@ -1,14 +1,13 @@
-# Binaries #
-############
-__pycache__
-venv
-env
-node_modules
-
-# Development Environment #
-###########################
 /.vscode
+/__pycache__
+/venv
+/env
+
+# Development files #
+######################
+.env
 *.code-workspace
+
 
 # OS generated files #
 ######################
