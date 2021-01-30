@@ -73,7 +73,9 @@ On Windows run `env\Scripts\activate.bat`
 
 On Linux run `source env/bin/activate`
 
-To run the server execute:
+Running the server should be as simple as typing `flask run` due to the installed
+dot-env package and the provided .env file. If that's not working execute this
+instead:
 
 ```
 export FLASK_APP=flaskr
