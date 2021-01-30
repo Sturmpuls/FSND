@@ -175,25 +175,27 @@ def create_app(test_config=None):
     @app.route('/quizzes', methods=['POST'])
     def get_random_question():
         body = request.get_json()
+        category = body.get('quiz_category')
+        previous = body.get('previous_questions')
 
-        if body is None or 'quiz_category' not in body.keys():
-            return abort(422)
+        # abort 400 (bad request) if data is empty
+        if (body is None) or (category is None) or (previous is None):
+            abort(400)
 
-        previous_questions = []
-        if 'previous_questions' in body.keys():
-            previous_questions = body['previous_questions']
+        id = category.get('id')
+        if id is None:
+            abort(400)
 
-        category = body['quiz_category']['id']
         # "ALL" categories
-        if category == 0:
+        if id == 0:
             query = Question.query.filter(
-                Question.id.notin_(previous_questions)
+                Question.id.notin_(previous)
                 )
         # Specific category
         else:
             query = Question.query.filter(
-                Question.category == category,
-                Question.id.notin_(previous_questions)
+                Question.category == id,
+                Question.id.notin_(previous)
                 )
         # Get random question from database
         row_count = int(query.count())
