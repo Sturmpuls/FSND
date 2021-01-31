@@ -15,7 +15,8 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        self.database_path = "postgresql://{}/{}".format('localhost:5432', self.database_name)
+        self.database_path = "postgresql://{}/{}".format('localhost:5432',
+                                                         self.database_name)
 
         setup_db(self.app, self.database_path)
 
@@ -61,10 +62,6 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after each test"""
         pass
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
     def test_get_categories(self):
         res = self.client().get('/categories')
         data = json.loads(res.data)
@@ -108,7 +105,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['created'], new_question.id)
         self.assertEqual(self.new_question['question'], new_question.question)
         self.assertEqual(self.new_question['answer'], new_question.answer)
-        self.assertEqual(self.new_question['difficulty'], new_question.difficulty)
+        self.assertEqual(self.new_question['difficulty'],
+                         new_question.difficulty)
         self.assertEqual(self.new_question['category'], new_question.category)
 
     def test_delete_question(self):
@@ -116,12 +114,12 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().delete(f'/questions/{id}')
         data = json.loads(res.data)
 
-        deleted = Question.query.filter_by(id=id).first()
+        query_deleted = Question.query.filter_by(id=id).first()
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'])
         self.assertEqual(data['deleted'], id)
-        self.assertIsNone(deleted)
+        self.assertIsNone(query_deleted)
 
     def test_search_question(self):
         res = self.client().post('/questions', json=self.search_question)
@@ -174,7 +172,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'resource not found')
 
     def test_404_if_search_question_not_found(self):
-        res = self.client().post('/questions', json=self.search_question_not_found)
+        res = self.client().post('/questions',
+                                 json=self.search_question_not_found)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)

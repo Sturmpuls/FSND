@@ -78,7 +78,7 @@ def create_app(test_config=None):
 
     @app.route('/questions', methods=['GET'])
     def get_questions():
-        '''Get all questions in all categories and return paginated questions.'''
+        '''Get all questions in all categories. Return paginated questions.'''
 
         # get all questions and paginate
         selection = Question.query.all()
@@ -113,7 +113,10 @@ def create_app(test_config=None):
         # Add a question to the database
         else:
             for key in ['question', 'answer', 'difficulty', 'category']:
-                if key not in body.keys() or body[key] == None or body[key] == '':
+                if (key not in body.keys() or
+                        body[key] is None or
+                        body[key] == ''):
+
                     return abort(422)
 
             try:
